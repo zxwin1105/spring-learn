@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
@@ -53,8 +54,10 @@ import org.springframework.util.Assert;
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
+	/** Bean定义资源加载器 */
 	private final AnnotatedBeanDefinitionReader reader;
 
+	/** Bean定义扫描器 */
 	private final ClassPathBeanDefinitionScanner scanner;
 
 
@@ -63,7 +66,15 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/*
+		 实例化Bean定义读取器,这里的this instanceof BeanDefinitionRegistry。
+		 这里会注册一些后续需要的元素PostProcessor到DefaultListableBeanFactory
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		/*
+		 实例化Bean定义扫描器，同上这里的this也是BeanDefinitionRegistry
+		 这个scanner用于扫描其他Bean，只用于用户使用this#scan()方法，扫描方法中的包。
+		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -72,6 +83,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param beanFactory the DefaultListableBeanFactory instance to use for this context
 	 */
 	public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
+		// 指定bean工厂
 		super(beanFactory);
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
@@ -84,8 +96,14 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/*
+		在实例化AnnotationConfigApplicationContext的过程中，
+		其父类主要实现了BeanFactory实例化、BeanDefinitionReader和BeanDefinitionRegister的实例化。
+		 */
 		this();
+		// 解析注册主配置类
 		register(componentClasses);
+		// ***spring核心模板方法
 		refresh();
 	}
 
@@ -148,6 +166,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	//---------------------------------------------------------------------
 
 	/**
+	 * 注册配置类
 	 * Register one or more component classes to be processed.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.

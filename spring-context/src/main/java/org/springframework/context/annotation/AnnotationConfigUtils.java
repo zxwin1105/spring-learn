@@ -144,11 +144,13 @@ public abstract class AnnotationConfigUtils {
 	 * that this registration was triggered from. May be {@code null}.
 	 * @return a Set of BeanDefinitionHolders, containing all bean definitions
 	 * that have actually been registered by this call
+	 * 注册所有注解相关的PostProcessors,这里会注册到DefaultListableBeanFactory#beanDefinitionMap属性
 	 */
 	public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		// 从registry获取bean工程。registry == AnnotationConfigApplicationContext
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+
 		if (beanFactory != null) {
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
@@ -160,12 +162,28 @@ public abstract class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
+		// 以下的所有if语句都是向beanFactory注册需要的原生PostProcessors
+
+		/*
+		    ===================以下的所有if语句都是向beanFactory注册需要的原生PostProcessors==============
+			这里registry对象所调用的方法都是DefaultListableBeanFactory中的方法。
+		 */
+
+		/*
+		  注册org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+		  ConfigurationClassPostProcessor的作用是解析配置类。其实现了PriorityOrdered
+		 */
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
 			def.setSource(source);
+			// 注册PostProcessor定义
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+		/*
+		注册org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+		该beanFactory后置处理器的作用是处理Bean的依赖注入相关的注解包括@Autowired @Value @Inject @Lookup
+		 */
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
@@ -173,6 +191,11 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		/*
+		 	检查 JSR-250 支持，如果存在则添加 CommonAnnotationBeanPostProcessor。
+			Spring使用JSR-250包含的注解有@PostConstruct， @PreDestroy 和 @Resource 注解
+			@Resource、@WebServiceRef、@EJB
+		 */
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);
@@ -180,6 +203,9 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JPA support, and if present add the PersistenceAnnotationBeanPostProcessor.
+		/*
+			检查 JPA 支持，如果存在，添加 PersistenceAnnotationBeanPostProcessor
+		 */
 		if (jpaPresent && !registry.containsBeanDefinition(PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();
 			try {
@@ -194,12 +220,18 @@ public abstract class AnnotationConfigUtils {
 			beanDefs.add(registerPostProcessor(registry, def, PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+		/*
+			EventListenerMethodProcessor负责处理@EventListener
+		 */
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, EVENT_LISTENER_PROCESSOR_BEAN_NAME));
 		}
 
+		/*
+			EventListenerMethodProcessor负责处理@EventListener
+		 */
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
 			def.setSource(source);
@@ -209,10 +241,19 @@ public abstract class AnnotationConfigUtils {
 		return beanDefs;
 	}
 
+	/**
+	 * 真正注册PostProcessor的流程方法
+	 * @param registry 注册器
+	 * @param definition 待注册的bean定义
+	 * @param beanName beaName
+	 * @return BeanDefinitionHolder对bd做了封装
+	 */
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 
+		// 设置BeanDefinition的角色为Spring内部
 		definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		// 调用DefaultListableBeanFactory的注册方法
 		registry.registerBeanDefinition(beanName, definition);
 		return new BeanDefinitionHolder(definition, beanName);
 	}

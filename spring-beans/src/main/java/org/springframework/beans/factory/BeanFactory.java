@@ -317,6 +317,8 @@ public interface BeanFactory {
 	 * @since 2.0.1
 	 * @see #getBean
 	 * @see #getType
+	 * 检查具有给定名称的 bean 是否与指定类型匹配。更具体地说，检查给定名称的 {@link getBean} 调用是否会返回可分配给指定目标类型的对象。
+	 * <p>将别名翻译回相应的规范 bean 名称。 <p>如果在这个工厂实例中找不到 bean，将询问父工厂。
 	 */
 	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
 

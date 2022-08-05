@@ -83,8 +83,11 @@ public class AnnotatedBeanDefinitionReader {
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
+		// 赋值registry
 		this.registry = registry;
+		// 通过registry和environment创建一个条件评估器
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		// 注册一些原生的BeanFactoryPostProcessors
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -236,8 +239,8 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
-	 * @param beanClass the class of the bean
-	 * @param name an explicit name for the bean
+	 * @param beanClass the class of the bean bean全类名
+	 * @param name an explicit name for the bean bean的显示名称
 	 * @param qualifiers specific qualifier annotations to consider, if any,
 	 * in addition to qualifiers at the bean class level
 	 * @param supplier a callback for creating an instance of the bean
@@ -250,18 +253,34 @@ public class AnnotatedBeanDefinitionReader {
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
 
+		// AnnotatedGenericBeanDefinition可以理解为一种数据结构，是用来描述Bean的，这里的作用就是把传入的标记了注解 的类
+		// 转为AnnotatedGenericBeanDefinition数据结构，里面有一个getMetadata方法，可以拿到类上的注解
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+		// 如果当前类不满足@Conditional相关注解条件则直接跳过。
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
 
 		abd.setInstanceSupplier(supplier);
+		// 解析Bean的作用域，如果存在，默认为单例
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
+		// 获取/生成 beanName
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
-
+		// 解析通用注解 Lazy，Primary，DependsOn，Role，Description
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+		/*
+			限定符处理，不是特指@Qualifier注解，也有可能是Primary,或者是Lazy，
+			或者是其他（理论上是任何注解，这里没有判断注解的有效性），如果我们在外面，以类似这种
+
+			AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(Appconfig.class);
+			常规方式去初始化spring，
+
+			qualifiers永远都是空的，包括上面的name和instanceSupplier都是同样的道理
+			但是spring提供了其他方式去注册bean,就可能会传入了
+		 */
 		if (qualifiers != null) {
+			// 可以传qualifier数组
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class == qualifier) {
 					abd.setPrimary(true);
@@ -281,7 +300,9 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		// 创建代理对象
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		// 注册，最终会调用DefaultListableBeanFactory中的registerBeanDefinition方法去注册，
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 
@@ -289,6 +310,9 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Get the Environment from the given registry if possible, otherwise return a new
 	 * StandardEnvironment.
+	 * 从registry获取Environment，这里的register是AnnotationConfigApplicationContext，
+	 * 而AnnotationConfigApplicationContext的祖先类AbstractApplicationContext实现了ConfigurableApplicationContext
+	 * ConfigurableApplicationContext的祖先继承了EnvironmentCapable。
 	 */
 	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");

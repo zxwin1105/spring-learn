@@ -27,6 +27,8 @@ import org.springframework.lang.Nullable;
  * constructor argument values, and further information supplied by
  * concrete implementations.
  *
+ * BeanDefinition 描述了一个 bean 实例，它具有属性值、构造函数参数值以及由具体实现提供的更多信息。
+ * BeanDefinition是一个最小接口，主要作用是提供给接口BeanFactoryPostProcessor供其修改bean定义的基本信息。
  * <p>This is just a minimal interface: The main intention is to allow a
  * {@link BeanFactoryPostProcessor} to introspect and modify property values
  * and other bean metadata.
@@ -45,6 +47,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
 	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
+	 * 单例Bean标识符：singleton
 	 */
 	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
@@ -53,6 +56,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
+	 * 原型Bean标识符：prototype
 	 */
 	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -60,6 +64,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Role hint indicating that a {@code BeanDefinition} is a major part
 	 * of the application. Typically corresponds to a user-defined bean.
+	 * 指示BeanDefinition是应用程序主要部分的角色提示。通常对应于用户定义的 bean。
 	 */
 	int ROLE_APPLICATION = 0;
 
@@ -71,6 +76,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * of when looking more closely at a particular
 	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition},
 	 * but not when looking at the overall configuration of an application.
+	 * 指示 {@code BeanDefinition} 是某些较大配置的支持部分的角色提示，通常是外部配置
 	 */
 	int ROLE_SUPPORT = 1;
 
@@ -79,6 +85,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * entirely background role and has no relevance to the end-user. This hint is
 	 * used when registering beans that are completely part of the internal workings
 	 * of a {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
+	 * 指示 {@code BeanDefinition} 提供完全后台角色且与最终用户无关的角色提示。
+	 *
+	 * 表示Spring内部的Bean
 	 */
 	int ROLE_INFRASTRUCTURE = 2;
 
@@ -171,6 +180,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return whether this bean is a candidate for getting autowired into some other bean.
+	 * 此 bean 是否是自动装配到其他 bean 的候选对象。
 	 */
 	boolean isAutowireCandidate();
 
