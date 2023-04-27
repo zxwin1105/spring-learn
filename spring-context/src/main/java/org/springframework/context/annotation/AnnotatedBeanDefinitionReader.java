@@ -49,11 +49,11 @@ import org.springframework.util.Assert;
 public class AnnotatedBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
-
+	/** 用于生产BeanName */
 	private BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
-
+	/** Bean Scope解析器，解析出类上@Scope注解 */
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
-
+	/** 条件评估器 */
 	private ConditionEvaluator conditionEvaluator;
 
 
@@ -154,7 +154,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
-	 * @param name an explicit name for the bean
+	 * @param name an explicit name for the bean 一个显示Bean名称
 	 * (or {@code null} for generating a default bean name)
 	 * @since 5.2
 	 */
@@ -267,7 +267,7 @@ public class AnnotatedBeanDefinitionReader {
 		abd.setScope(scopeMetadata.getScopeName());
 		// 获取/生成 beanName
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
-		// 解析通用注解 Lazy，Primary，DependsOn，Role，Description
+		// 解析通用注解 Lazy，Primary，DependsOn，Role，Description，填充到AnnotationMetadata
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		/*
 			限定符处理，不是特指@Qualifier注解，也有可能是Primary,或者是Lazy，

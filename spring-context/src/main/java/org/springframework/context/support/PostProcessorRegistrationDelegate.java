@@ -95,7 +95,7 @@ final class PostProcessorRegistrationDelegate {
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
 			/*
 			 从容器中获取BeanDefinitionRegistryPostProcessor类型所有bean的名称，一般只能获取一个internalConfigurationAnnotationProcessor
-			 知道这里spring还没有扫描，所以我们自定义的BeanDefinitionRegistryPostProcessor也是获取不到
+			 直到这里spring还没有扫描，所以我们自定义的BeanDefinitionRegistryPostProcessor也是获取不到
 			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);

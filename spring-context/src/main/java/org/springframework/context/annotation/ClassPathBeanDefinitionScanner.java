@@ -164,6 +164,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 		// 判断是否使用默认过滤器
 		if (useDefaultFilters) {
+			// 注册默认过滤器
 			registerDefaultFilters();
 		}
 		// 设置环境

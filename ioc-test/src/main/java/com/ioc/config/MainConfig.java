@@ -1,6 +1,9 @@
 package com.ioc.config;
 
+import com.ioc.entity.TankBean;
 import com.ioc.entity.User;
+import com.ioc.postprocess.MyBeanFactoryPostProcess;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.*;
 
 /**
@@ -10,9 +13,8 @@ import org.springframework.context.annotation.*;
  */
 @Lazy
 @Configuration
-@ComponentScan(basePackages = "com.ioc")
+//@ComponentScan(basePackages = "com.ioc")
 public class MainConfig {
-
 
 	@Bean
 	public User user(){
@@ -22,4 +24,13 @@ public class MainConfig {
 		return user;
 	}
 
+	@Bean
+	public TankBean tankBean(){
+		return new TankBean("origin");
+	}
+
+	@Bean
+	public BeanFactoryPostProcessor myBeanFactoryPostProcess(){
+		return new MyBeanFactoryPostProcess();
+	}
 }

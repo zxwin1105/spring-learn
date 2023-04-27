@@ -101,7 +101,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		其父类主要实现了BeanFactory实例化、BeanDefinitionReader和BeanDefinitionRegister的实例化。
 		 */
 		this();
-		// 解析注册主配置类
+		// 将配置类解析为BD，并注册到bean工厂
 		register(componentClasses);
 		// ***spring核心模板方法
 		refresh();

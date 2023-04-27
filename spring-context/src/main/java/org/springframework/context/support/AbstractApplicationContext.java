@@ -593,7 +593,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Prepare this context for refreshing, setting its startup date and
 	 * active flag as well as performing any initialization of property sources.
-	 * 主要做了一些刷新前的准备工作，和主流程关系不大，主要是保存了容器的启动时间，启动标志等
+	 * 主要做了一些refresh()前的准备工作，和主流程关系不大，主要是保存了容器的启动时间，启动标志等
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.

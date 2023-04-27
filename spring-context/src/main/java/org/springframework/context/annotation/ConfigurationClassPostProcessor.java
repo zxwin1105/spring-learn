@@ -84,7 +84,8 @@ import org.springframework.util.ClassUtils;
  * @author Sam Brannen
  * @since 3.0
  *
- * 用于解析配置类
+ * 用于解析配置类, ConfigurationClassPostProcessor实现了BeanDefinitionRegistryPostProcessor具有注册BD功能，
+ * BeanDefinitionRegistryPostProcessor本质上也是一个BeanFactoryPostProcess
  */
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
 		PriorityOrdered, ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
@@ -275,12 +276,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		String[] candidateNames = registry.getBeanDefinitionNames();
 		// 遍历容器中的所有beanDefinition，将要处理的配置类缓存到configCandidates
 		for (String beanName : candidateNames) {
+			// 获取bean 定义
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
+
 			if (beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE) != null) {
-				if (logger.isDebugEnabled()) { // 配置类已经被处理过了
+				if (logger.isDebugEnabled()) {
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
-			}
+			} // 检测bd是否为配置类
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -320,10 +323,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-		// 带解析的配置类
+		// 待解析的配置类
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size()); // 已经完成解析的配置类
 		do {
+			// 解析配置类
 			parser.parse(candidates);
 			parser.validate();
 

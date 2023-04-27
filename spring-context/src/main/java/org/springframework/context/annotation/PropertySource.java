@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
 import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
+ * 用于读取指定资源文件的位置，可以读取properties、xml
  * Annotation providing a convenient and declarative mechanism for adding a
  * {@link org.springframework.core.env.PropertySource PropertySource} to Spring's
  * {@link org.springframework.core.env.Environment Environment}. To be used in
