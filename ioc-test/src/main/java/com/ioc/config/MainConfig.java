@@ -11,7 +11,6 @@ import org.springframework.context.annotation.*;
  * @date 2022/7/27
  * @description
  */
-@Lazy
 @Configuration
 //@ComponentScan(basePackages = "com.ioc")
 public class MainConfig {

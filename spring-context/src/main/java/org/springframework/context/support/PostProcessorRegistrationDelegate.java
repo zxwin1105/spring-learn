@@ -58,7 +58,7 @@ final class PostProcessorRegistrationDelegate {
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
-		// processedBeans用于记录执行过的后置处理器，防止重复执行
+		// processedBeans用于记录处理过的后置处理器，防止重复执行
 		Set<String> processedBeans = new HashSet<>();
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		/*
@@ -238,21 +238,27 @@ final class PostProcessorRegistrationDelegate {
 
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
-
+		// 获取所有的后置处理器
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+		// BeanPostProcessorChecker信息打印
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
+		// 保存实现了PriorityOrdered接口的后置处理器
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
+		// 保存MergedBeanDefinitionPostProcessor后置处理器
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
+		// 保存实现了ordered接口的后置处理器
 		List<String> orderedPostProcessorNames = new ArrayList<>();
+		// 保存没有实现任何排序接口的后置处理器
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+		// 将后置处理器添加到对应的集合中
 		for (String ppName : postProcessorNames) {
 			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
@@ -269,6 +275,7 @@ final class PostProcessorRegistrationDelegate {
 
 		// First, register the BeanPostProcessors that implement PriorityOrdered.
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
+		// 注册，实际上是保存到AbstractBeanFactory@beanPostProcessors集合中，在getBean是直接拿来用
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.
