@@ -275,7 +275,7 @@ final class PostProcessorRegistrationDelegate {
 
 		// First, register the BeanPostProcessors that implement PriorityOrdered.
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
-		// 注册，实际上是保存到AbstractBeanFactory@beanPostProcessors集合中，在getBean是直接拿来用
+		// 注册，实际上是保存到AbstractBeanFactory@beanPostProcessors集合中，在getBean时直接拿来用
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.

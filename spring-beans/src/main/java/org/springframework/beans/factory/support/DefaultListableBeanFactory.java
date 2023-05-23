@@ -900,7 +900,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						}
 					}
 				}
-				else {
+				else { // 非给FactoryBean
 					getBean(beanName);
 				}
 			}

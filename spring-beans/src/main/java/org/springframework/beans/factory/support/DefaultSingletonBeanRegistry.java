@@ -84,9 +84,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
+	/** 已经完成注册的Bean */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation. */
+	/** 当前正在创建的Bean，也是为了解决循环依赖的问题 */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
@@ -181,11 +183,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		// Quick check for existing instance without full singleton lock
 		// 从一级缓存中获取Bean
 		Object singletonObject = this.singletonObjects.get(beanName);
-		// 一级缓存中不存在Bean，且Bean正处于创建过程中
+		// 一级缓存中不存在Bean，且Bean正处于创建过程中 （下面开始是为了解决循环依赖）
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			// 从二级缓存中获取Bean
 			singletonObject = this.earlySingletonObjects.get(beanName);
-			// 二级缓存中不存在，且允许提前引用Bean
+			// 二级缓存中不存在，且循环引用
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
